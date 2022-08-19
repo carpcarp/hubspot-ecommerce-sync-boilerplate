@@ -1,0 +1,2047 @@
+{
+	"info": {
+		"_postman_id": "f9db18d9-b533-4e67-a4c1-97ac17e69d06",
+		"name": "Migration Boilerplate",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20193231"
+	},
+	"item": [
+		{
+			"name": "Upsert Ecommerce Pipeline",
+			"item": [
+				{
+					"name": "Check for existing ecommerce pipeline",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"",
+									"try {",
+									"    const ecommerce_pipleine = jsonData.results.filter(obj => {",
+									"        return obj.label === \"Ecommerce Pipeline\";",
+									"    })[0];",
+									"    pipeline_id = ecommerce_pipleine.id",
+									"    pm.collectionVariables.set(\"pipeline_id\", pipeline_id);",
+									"    pm.test(`Ecommerce pipeline exists as id ${pipeline_id}`, () => true); ",
+									"    // postman.setNextRequest()",
+									"} catch (error) {",
+									"    pm.collectionVariables.set(\"pipeline_id\", \"\");",
+									"    pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Cannot read properties of undefined\")}); ",
+									"  // expected output: ReferenceError: nonExistentFunction is not defined",
+									"  // Note - error messages will vary depending on browser",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://api.hubapi.com/crm/v3/pipelines/deal",
+							"protocol": "https",
+							"host": [
+								"api",
+								"hubapi",
+								"com"
+							],
+							"path": [
+								"crm",
+								"v3",
+								"pipelines",
+								"deal"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Ecommerce Pipeline",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Checks existence of Pipeline prior to request",
+									"var pipeline_exists;",
+									"var test_message;",
+									"var pipeline_id_known = pm.collectionVariables.get(\"pipeline_id\")!=\"\";",
+									"var create_pipeline_flag = pm.collectionVariables.get(\"create_pipeline_flag\")==true;",
+									"if(pipeline_id_known || !create_pipeline_flag){",
+									"    pipeline_exists = true",
+									"    test_message = \"Ecommerce Pipeline exists or create_pipeline_flag is false, skipping this request\"",
+									"    pm.request.url = 'https://www.postman-echo.com/delay/0';",
+									"    pm.request.method = 'GET'; ",
+									"} else{",
+									"    pipeline_exists = false",
+									"    test_message = \"Ecommerce Pipeline does not exist. \\n Creating Ecommerce Pipeline\"",
+									"}",
+									"",
+									"",
+									"pm.test(test_message, () => {});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"try {",
+									"    const ecommerce_pipleine = jsonData",
+									"    pipeline_id = ecommerce_pipleine.id",
+									"    pm.collectionVariables.set(\"pipeline_id\", pipeline_id);",
+									"    pm.test(`Ecommerce pipeline exists as id ${pipeline_id}`, () => true); ",
+									"    // postman.setNextRequest()",
+									"} catch (error) {",
+									"    pm.collectionVariables.set(\"pipeline_id\", \"\");",
+									"    pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Cannot read properties of undefined\")}); ",
+									"  // expected output: ReferenceError: nonExistentFunction is not defined",
+									"  // Note - error messages will vary depending on browser",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "        {\n            \"label\": \"Ecommerce Pipeline\",\n            \"displayOrder\": 0,\n            \"stages\": [\n                {\n                    \"label\": \"Checkout Abandoned\",\n                    \"displayOrder\": 1,\n                    \"metadata\": {\n                        \"isClosed\": \"false\",\n                        \"probability\": \"0.2\"\n                    },\n                    \"id\": \"checkout_abandoned\"\n                },\n                {\n                    \"label\": \"Checkout Pending\",\n                    \"displayOrder\": 2,\n                    \"metadata\": {\n                        \"isClosed\": \"false\",\n                        \"probability\": \"0.5\"\n                    },\n                    \"id\": \"checkout_pending\"\n                },\n                {\n                    \"label\": \"Checkout Completed\",\n                    \"displayOrder\": 3,\n                    \"metadata\": {\n                        \"isClosed\": \"false\",\n                        \"probability\": \"0.9\"\n                    },\n                    \"id\": \"checkout_completed\"\n                },\n                {\n                    \"label\": \"Shipped\",\n                    \"displayOrder\": 4,\n                    \"metadata\": {\n                        \"isClosed\": \"true\",\n                        \"probability\": \"1.0\"\n                    },\n                    \"id\": \"shipped\"\n                },\n                {\n                    \"label\": \"Cancelled\",\n                    \"displayOrder\": 5,\n                    \"metadata\": {\n                        \"isClosed\": \"true\",\n                        \"probability\": \"0.0\"\n                    },\n                    \"id\": \"cancelled\"\n                }\n            ]\n        }"
+						},
+						"url": {
+							"raw": "https://api.hubapi.com/crm/v3/pipelines/deal",
+							"protocol": "https",
+							"host": [
+								"api",
+								"hubapi",
+								"com"
+							],
+							"path": [
+								"crm",
+								"v3",
+								"pipelines",
+								"deal"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create Properties",
+			"item": [
+				{
+					"name": "Contact",
+					"item": [
+						{
+							"name": "Create New Ecommerce Group Contact",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{ecommerce_property_group_internal_name}}\",\n    \"displayOrder\": -1,\n    \"label\": \"{{ecommerce_property_group_label}}\"\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/contact/groups",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"contact",
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Contact Store Id",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n  \"hidden\": false,\n  \"displayOrder\": 2,\n  \"options\": [\n    {\n      \"label\": \"{{store_id_label}}\",\n      \"description\": \"{{store_id_description}}\",\n      \"value\": \"{{store_id_value}}\",\n      \"displayOrder\": 1,\n      \"hidden\": false\n    }\n  ],\n  \"label\": \"Source store\",\n  \"name\": \"store_id\",\n  \"hasUniqueValue\": false,\n  \"type\": \"enumeration\",\n  \"fieldType\": \"checkbox\",\n  \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/contact",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"contact"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ecommerce Synced",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n  \"hidden\": false,\n  \"displayOrder\": 2,\n    \"options\": [\n        {\n            \"label\": \"True\",\n            \"value\": \"true\",\n            \"displayOrder\": 0,\n            \"hidden\": false\n        },\n        {\n            \"label\": \"False\",\n            \"value\": \"false\",\n            \"displayOrder\": 1,\n            \"hidden\": false\n        }\n    ],\n  \"label\": \"Ecommerce Synced\",\n  \"name\": \"ecommerce_synced\",\n  \"hasUniqueValue\": false,\n  \"type\": \"bool\",\n  \"fieldType\": \"booleancheckbox\",\n  \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/contact",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"contact"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Deal",
+					"item": [
+						{
+							"name": "Create New Ecommerce Group Deal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{ecommerce_property_group_internal_name}}\",\n    \"displayOrder\": -1,\n    \"label\": \"{{ecommerce_property_group_label}}\"\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal/groups",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal",
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deal Store Id",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n  \"hidden\": false,\n  \"displayOrder\": 2,\n  \"options\": [\n    {\n      \"label\": \"{{store_id_label}}\",\n      \"description\": \"{{store_id_description}}\",\n      \"value\": \"{{store_id_value}}\",\n      \"displayOrder\": 1,\n      \"hidden\": false\n    }\n  ],\n  \"label\": \"Source store\",\n  \"name\": \"store_id\",\n  \"hasUniqueValue\": false,\n  \"type\": \"enumeration\",\n  \"fieldType\": \"select\",\n  \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ecommerce Synced",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n  \"hidden\": false,\n  \"displayOrder\": 2,\n    \"options\": [\n        {\n            \"label\": \"True\",\n            \"value\": \"true\",\n            \"displayOrder\": 0,\n            \"hidden\": false\n        },\n        {\n            \"label\": \"False\",\n            \"value\": \"false\",\n            \"displayOrder\": 1,\n            \"hidden\": false\n        }\n    ],\n  \"label\": \"Ecommerce Synced\",\n  \"name\": \"ecommerce_synced\",\n  \"hasUniqueValue\": false,\n  \"type\": \"bool\",\n  \"fieldType\": \"booleancheckbox\",\n  \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deal Abandoned Cart URL",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Abandoned Cart URL\",\n    \"name\": \"abandoned_cart_url\",\n    \"hasUniqueValue\": false,\n    \"type\": \"string\",\n    \"fieldType\": \"text\",\n    \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deal Discount Amount",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Discount Amount\",\n    \"name\": \"discount_amount\",\n    \"hasUniqueValue\": false,\n    \"type\": \"number\",\n    \"fieldType\": \"number\",\n    \"formField\": false,\n    \"showCurrencySymbol\": true\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deal Order Number",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Order Number\",\n    \"name\": \"order_number\",\n    \"hasUniqueValue\": false,\n    \"type\": \"string\",\n    \"fieldType\": \"text\",\n    \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Deal Tax Amount",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Tax Amount\",\n    \"name\": \"tax_amount\",\n    \"hasUniqueValue\": false,\n    \"type\": \"number\",\n    \"fieldType\": \"number\",\n    \"formField\": false,\n    \"showCurrencySymbol\": true\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/deal",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"deal"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Product",
+					"item": [
+						{
+							"name": "Create New Ecommerce Group Product",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{ecommerce_property_group_internal_name}}\",\n    \"displayOrder\": -1,\n    \"label\": \"{{ecommerce_property_group_label}}\"\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/product/groups",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"product",
+										"groups"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Product Store Id",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n  \"hidden\": false,\n  \"displayOrder\": 2,\n  \"options\": [\n    {\n      \"label\": \"{{store_id_label}}\",\n      \"description\": \"{{store_id_description}}\",\n      \"value\": \"{{store_id_value}}\",\n      \"displayOrder\": 1,\n      \"hidden\": false\n    }\n  ],\n  \"label\": \"Source store\",\n  \"name\": \"store_id\",\n  \"hasUniqueValue\": false,\n  \"type\": \"enumeration\",\n  \"fieldType\": \"select\",\n  \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/product",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"product"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Product Image Url",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Image Url*\",\n    \"name\": \"image_url\",\n    \"hasUniqueValue\": false,\n    \"type\": \"string\",\n    \"fieldType\": \"text\",\n    \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/product",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"product"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Product Discount Amount",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"label\": \"Discount Amount\",\n    \"name\": \"discount_amount\",\n    \"hasUniqueValue\": false,\n    \"type\": \"number\",\n    \"fieldType\": \"number\",\n    \"formField\": false,\n    \"showCurrencySymbol\": true\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/product",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"product"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ecommerce Synced",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"groupName\": \"{{ecommerce_property_group_internal_name}}\",\n    \"hidden\": false,\n    \"displayOrder\": 2,\n    \"options\": [\n        {\n            \"label\": \"True\",\n            \"value\": \"true\",\n            \"displayOrder\": 0,\n            \"hidden\": false\n        },\n        {\n            \"label\": \"False\",\n            \"value\": \"false\",\n            \"displayOrder\": 1,\n            \"hidden\": false\n        }\n    ],\n    \"name\": \"ecommerce_synced\",\n    \"label\": \"Ecommerce Synced\",\n    \"hasUniqueValue\": false,\n    \"type\": \"bool\",\n    \"fieldType\": \"booleancheckbox\",\n    \"formField\": false\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/properties/product",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"properties",
+										"product"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"req_rec_label = console.log(JSON.parse(pm.request.body).label);",
+							"var create_properties_flag = pm.collectionVariables.get(\"create_properties_flag\") == \"true\";",
+							"if(!create_properties_flag){",
+							"    // test_message = \"create_properties_flag is false skipping property creation\"",
+							"    pm.test(\"Skipping Request\", () => {throw new Error(\"create_properties_flag is false skipping property or group creation\")}); ",
+							"    pm.request.url = 'https://www.postman-echo.com/delay/0';",
+							"    pm.request.method = 'GET'; ",
+							"} else{",
+							"    pm.test(`Creating property or group ${req_rec_label}`, () => true);    ",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Example Sync Messages",
+			"item": [
+				{
+					"name": "Contact",
+					"item": [
+						{
+							"name": "Create Contact",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"try {",
+											"    const record_id = jsonData.id",
+											"    pm.collectionVariables.set(\"created_contact_id\", record_id);",
+											"    pm.test(`Record Created`, () => true); ",
+											"    // postman.setNextRequest()",
+											"} catch (error) {",
+											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"email\": \"alex@hubspot.com\",\n    \"firstname\": \"Alex\",\n    \"lastname\": \"Carpenter\",\n    \"store_id\": \";{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/contacts",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"contacts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read Contact",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/contacts",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"contacts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Contact",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"firstname\": \"Alexander\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/contacts/:contactid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"contacts",
+										":contactid"
+									],
+									"variable": [
+										{
+											"key": "contactid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Contact",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/contacts/:contactid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"contacts",
+										":contactid"
+									],
+									"variable": [
+										{
+											"key": "contactid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Deal",
+					"item": [
+						{
+							"name": "Create Deal",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"try {",
+											"    const record_id = jsonData.id",
+											"    pm.collectionVariables.set(\"created_deal_id\", record_id);",
+											"    pm.test(`Record Created`, () => true); ",
+											"    // postman.setNextRequest()",
+											"} catch (error) {",
+											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"amount\": \"1500.00\",\n    \"discount_amount\": \"200.00\",\n    \"tax_amount\": \"15.00\",\n    \"abandoned_cart_url\": \"google.com/cart_recovery_url\",\n    \"order_number\": \"123456\",\n    \"closedate\": \"2019-12-07T16:50:06.678Z\",\n    \"dealname\": \"Alex Carpenter - 123456\",\n    \"dealstage\": \"shipped\",\n    \"pipeline\": \"{{pipeline_id}}\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/deals",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"deals"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read Deal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/deals",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"deals"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Deal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"amount\": \"2000.00\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/deals/:dealid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"deals",
+										":dealid"
+									],
+									"variable": [
+										{
+											"key": "dealid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Deal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/deals/:dealid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"deals",
+										":dealid"
+									],
+									"variable": [
+										{
+											"key": "dealid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Product",
+					"item": [
+						{
+							"name": "Create Product",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"try {",
+											"    const record_id = jsonData.id",
+											"    pm.collectionVariables.set(\"created_product_id\", record_id);",
+											"    pm.test(`Record Created`, () => true); ",
+											"    // postman.setNextRequest()",
+											"} catch (error) {",
+											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"description\": \"Ecommerce product example\",\n    \"hs_cost_of_goods_sold\": \"600.00\",\n    \"hs_sku\": \"191902\",\n    \"name\": \"Implementation Service \",\n    \"price\": \"6000.00\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/products",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read Product",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/products",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Product",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"price\": \"5000.00\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/products/:productid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"products",
+										":productid"
+									],
+									"variable": [
+										{
+											"key": "productid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Product",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/products/:productid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"products",
+										":productid"
+									],
+									"variable": [
+										{
+											"key": "productid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Line Item",
+					"item": [
+						{
+							"name": "Create Line Item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"try {",
+											"    const record_id = jsonData.id",
+											"    pm.collectionVariables.set(\"created_line_item_id\", record_id);",
+											"    pm.test(`Record Created`, () => true); ",
+											"    // postman.setNextRequest()",
+											"} catch (error) {",
+											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"hs_product_id\": \"{{created_product_id}}\",\n    \"quantity\": \"2\",\n    \"price\": \"6000.00\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/line_items",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"line_items"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read Line Item",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/line_items/:lineitemid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"line_items",
+										":lineitemid"
+									],
+									"variable": [
+										{
+											"key": "lineitemid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Line Item",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"properties\": {\n    \"price\": \"5000.00\"\n  }\n}"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/line_items/:lineitemid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"line_items",
+										":lineitemid"
+									],
+									"variable": [
+										{
+											"key": "lineitemid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Line Item",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v3/objects/line_items/:lineitemid",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v3",
+										"objects",
+										"line_items",
+										":lineitemid"
+									],
+									"variable": [
+										{
+											"key": "lineitemid",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Associations",
+					"item": [
+						{
+							"name": "Associate Line Item to Deal",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"associationCategory\": \"HUBSPOT_DEFINED\",\n        \"associationTypeId\": 20\n    }\n]"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v4/objects/line_item/{{created_line_item_id}}/associations/deal/{{created_deal_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v4",
+										"objects",
+										"line_item",
+										"{{created_line_item_id}}",
+										"associations",
+										"deal",
+										"{{created_deal_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Associate Deal to Contact",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"associationCategory\": \"HUBSPOT_DEFINED\",\n        \"associationTypeId\": 3\n    }\n]"
+								},
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v4/objects/deal/{{created_deal_id}}/associations/contact/{{created_contact_id}}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v4",
+										"objects",
+										"deal",
+										"{{created_deal_id}}",
+										"associations",
+										"contact",
+										"{{created_contact_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read association",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v4/objects/{objectType}/{objectId}/associations/{toObjectType}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v4",
+										"objects",
+										"{objectType}",
+										"{objectId}",
+										"associations",
+										"{toObjectType}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Association",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://api.hubapi.com/crm/v4/objects/{objectType}/{objectId}/associations/{toObjectType}",
+									"protocol": "https",
+									"host": [
+										"api",
+										"hubapi",
+										"com"
+									],
+									"path": [
+										"crm",
+										"v4",
+										"objects",
+										"{objectType}",
+										"{objectId}",
+										"associations",
+										"{toObjectType}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var create_example_objects_flag = pm.collectionVariables.get(\"create_example_objects_flag\") == \"true\";",
+							"if(!create_example_objects_flag){",
+							"    // test_message = \"create_properties_flag is false skipping property creation\"",
+							"    pm.test(\"Skipping Request\", () => {throw new Error(\"create_example_objects_flag is false, object creation skipped\")}); ",
+							"    pm.request.url = 'https://www.postman-echo.com/delay/0';",
+							"    pm.request.method = 'GET'; ",
+							"} else{",
+							"    // pm.test(`Creating example object`, () => true);    ",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "store_id_value",
+			"value": "store_1",
+			"type": "string"
+		},
+		{
+			"key": "store_id_description",
+			"value": "This is the description for store 1",
+			"type": "string"
+		},
+		{
+			"key": "store_id_label",
+			"value": "Example Store 1",
+			"type": "string"
+		},
+		{
+			"key": "pipeline_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "create_pipeline_flag",
+			"value": "false",
+			"type": "string"
+		},
+		{
+			"key": "create_properties_flag",
+			"value": "false",
+			"type": "string"
+		},
+		{
+			"key": "create_example_objects_flag",
+			"value": "false",
+			"type": "string"
+		},
+		{
+			"key": "created_deal_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_contact_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_line_item_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ecommerce_property_group_internal_name",
+			"value": "ecommerce",
+			"type": "string"
+		},
+		{
+			"key": "ecommerce_property_group_label",
+			"value": "Ecommerce New",
+			"type": "string"
+		}
+	]
+}
