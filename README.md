@@ -25,21 +25,21 @@
 
 **Open collection variables:**
 
-    store_id_value:  			Internal name of your new Source Store
+    store_id_value:  		Internal name of your new Source Store
     store_id_description:		Description of your new Source Store
     store_id_label:			Visible label of selected Source Store on Hubspot object
 
     ecommerce_property_group_internal_name: 	Internal name of Ecommerce property group for each object
     ecommerce_property_group_label: 		Label of Ecommerce property group for each object
     
-    create_pipeline_flag:		Set to true if you would like to create pipeline using collection runner
+    create_pipeline_flag:			Set to true if you would like to create pipeline using collection runner
     create_properties_flag: 		Set to true if you would like to create properties using collection runner
     create_properties_flag: 		Set to true if you would like to create properties using collection runner
-    create_example_objects_flag: 	Set to true if you would like to create example objects using collection runner
+    create_example_objects_flag: 		Set to true if you would like to create example objects using collection runner
     
     pipeline_id:			Leave blank, collection runner will set this based on either the existing or newly created commerce pipeline.
     created_contact_id: 		Leave blank, used for object creation and associations
-    created_deal_id: 			Leave blank, used for object creation and associations
+    created_deal_id: 		Leave blank, used for object creation and associations
     created_product_id: 		Leave blank, used for object creation and associations
     created_line_item_id: 		Leave blank, used for object creation and associations
     
