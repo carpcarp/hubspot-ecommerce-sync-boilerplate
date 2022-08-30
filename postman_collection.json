@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f9db18d9-b533-4e67-a4c1-97ac17e69d06",
+		"_postman_id": "8001ee56-d904-4293-96b0-91113dc632bf",
 		"name": "Migration Boilerplate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20193231"
@@ -17,21 +17,30 @@
 							"script": {
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
-									"",
-									"",
+									"var ecommerce_pipeline;",
+									"// Find Ecommerce Pipeline ID",
 									"try {",
-									"    const ecommerce_pipleine = jsonData.results.filter(obj => {",
+									"    ecommerce_pipeline = jsonData.results.filter(obj => {",
 									"        return obj.label === \"Ecommerce Pipeline\";",
 									"    })[0];",
-									"    pipeline_id = ecommerce_pipleine.id",
+									"    pipeline_id = ecommerce_pipeline.id",
 									"    pm.collectionVariables.set(\"pipeline_id\", pipeline_id);",
+									"    console.log(pm.collectionVariables.get(\"pipeline_id\"));",
 									"    pm.test(`Ecommerce pipeline exists as id ${pipeline_id}`, () => true); ",
-									"    // postman.setNextRequest()",
+									"    ",
 									"} catch (error) {",
 									"    pm.collectionVariables.set(\"pipeline_id\", \"\");",
-									"    pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Cannot read properties of undefined\")}); ",
-									"  // expected output: ReferenceError: nonExistentFunction is not defined",
-									"  // Note - error messages will vary depending on browser",
+									"    pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Pipeline not found. If pipeline already exists please update pipeline_id in the collection variables with the relevant id\")});",
+									"}",
+									"// Find Shipped Stage ID",
+									"try{",
+									"        const shipped_stage = ecommerce_pipeline.stages.filter(obj => {",
+									"            return obj.label === \"Shipped\";",
+									"        })[0];",
+									"        const shipped_stage_id = shipped_stage.id",
+									"        pm.collectionVariables.set(\"shipped_stage_id\", shipped_stage_id);",
+									"} catch (error){",
+									"    pm.test(\"Shipped stage not found\", () => {throw new Error(\"If shipped stage already exists please update shipped_stage_id in the collection variables with the relevant id\")}); ",
 									"}"
 								],
 								"type": "text/javascript"
@@ -84,7 +93,7 @@
 									"var create_pipeline_flag = pm.collectionVariables.get(\"create_pipeline_flag\")=='true';",
 									"if(pipeline_id_known || !create_pipeline_flag){",
 									"    pipeline_exists = true",
-									"    test_message = \"Ecommerce Pipeline exists or create_pipeline_flag is false, skipping this request\"",
+									"    test_message = `Ecommerce Pipeline ID Known: ${pipeline_id_known}. Create_pipeline_flag is ${create_pipeline_flag}, skipping this request`",
 									"    pm.request.url = 'https://www.postman-echo.com/delay/0';",
 									"    pm.request.method = 'GET'; ",
 									"} else{",
@@ -103,19 +112,20 @@
 							"script": {
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
-									"",
-									"try {",
-									"    const ecommerce_pipleine = jsonData",
-									"    pipeline_id = ecommerce_pipleine.id",
-									"    pm.collectionVariables.set(\"pipeline_id\", pipeline_id);",
-									"    pm.test(`Ecommerce pipeline exists as id ${pipeline_id}`, () => true); ",
-									"    // postman.setNextRequest()",
-									"} catch (error) {",
-									"    pm.collectionVariables.set(\"pipeline_id\", \"\");",
-									"    pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Cannot read properties of undefined\")}); ",
-									"  // expected output: ReferenceError: nonExistentFunction is not defined",
-									"  // Note - error messages will vary depending on browser",
-									"}"
+									"if(pm.response.code==201){",
+									"    try {",
+									"        const ecommerce_pipleine = jsonData",
+									"        pipeline_id = ecommerce_pipleine.id",
+									"        pm.collectionVariables.set(\"pipeline_id\", pipeline_id);",
+									"        pm.test(`Ecommerce pipeline exists as id ${pipeline_id}`, () => true); ",
+									"    } catch (error) {",
+									"        pm.test(\"Ecommerce Pipeline not found\", () => {throw new Error(\"Cannot read properties of undefined\")}); ",
+									"    }",
+									"}",
+									"else {",
+									"     pm.test(\"Request Failed\", () => {throw new Error(pm.response.status)}); ",
+									"}",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1130,7 +1140,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"properties\": {\n    \"amount\": \"1500.00\",\n    \"discount_amount\": \"200.00\",\n    \"tax_amount\": \"15.00\",\n    \"abandoned_cart_url\": \"google.com/cart_recovery_url\",\n    \"order_number\": \"123456\",\n    \"closedate\": \"2019-12-07T16:50:06.678Z\",\n    \"dealname\": \"Alex Carpenter - 123456\",\n    \"dealstage\": \"shipped\",\n    \"pipeline\": \"{{pipeline_id}}\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+									"raw": "{\n  \"properties\": {\n    \"amount\": \"1500.00\",\n    \"discount_amount\": \"200.00\",\n    \"tax_amount\": \"15.00\",\n    \"abandoned_cart_url\": \"google.com/cart_recovery_url\",\n    \"order_number\": \"123456\",\n    \"closedate\": \"2019-12-07T16:50:06.678Z\",\n    \"dealname\": \"Alex Carpenter - 123456\",\n    \"dealstage\": {{shipped_stage_id}},\n    \"pipeline\": \"{{pipeline_id}}\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
 								},
 								"url": {
 									"raw": "https://api.hubapi.com/crm/v3/objects/deals",
@@ -1344,7 +1354,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"properties\": {\n    \"description\": \"Ecommerce product example\",\n    \"hs_cost_of_goods_sold\": \"600.00\",\n    \"hs_sku\": \"191902\",\n    \"name\": \"Implementation Service \",\n    \"price\": \"6000.00\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"ecommerce_synced\": true\n  }\n}"
+									"raw": "{\n  \"properties\": {\n    \"description\": \"Ecommerce product example\",\n    \"hs_cost_of_goods_sold\": \"600.00\",\n    \"hs_sku\": \"293902\",\n    \"name\": \"Green Pocket Tee \",\n    \"price\": \"6000.00\",\n    \"store_id\": \"{{store_id_value}}\",\n    \"image_url\": \"https://indigoandcotton-com-media.imgix.net/catalog/product/cache/1/image/9df78eab33525d08d6e5fb8d27136e95/r/r/rrl-crew-pocket-tee-picket-green.jpg?\",\n    \"ecommerce_synced\": true\n  }\n}"
 								},
 								"url": {
 									"raw": "https://api.hubapi.com/crm/v3/objects/products",
@@ -1934,8 +1944,8 @@
 					"script": {
 						"type": "text/javascript",
 						"exec": [
-							"var create_example_objects_flag = pm.collectionVariables.get(\"create_example_objects_flag\") == \"true\";",
-							"if(!create_example_objects_flag){",
+							"var create_example_objects_flag = pm.collectionVariables.get(\"create_example_objects_flag\") == 'true';",
+							"if(create_example_objects_flag != true){",
 							"    // test_message = \"create_properties_flag is false skipping property creation\"",
 							"    pm.test(\"Skipping Request\", () => {throw new Error(\"create_example_objects_flag is false, object creation skipped\")}); ",
 							"    pm.request.url = 'https://www.postman-echo.com/delay/0';",
@@ -1995,24 +2005,38 @@
 			"type": "string"
 		},
 		{
+			"key": "ecommerce_property_group_internal_name",
+			"value": "ecommerce",
+			"type": "string"
+		},
+		{
+			"key": "ecommerce_property_group_label",
+			"value": "Ecommerce New",
+			"type": "string"
+		},
+		{
+			"key": "create_pipeline_flag",
+			"value": "true",
+			"type": "string"
+		},
+		{
+			"key": "create_properties_flag",
+			"value": "true",
+			"type": "string"
+		},
+		{
+			"key": "create_example_objects_flag",
+			"value": "true",
+			"type": "string"
+		},
+		{
 			"key": "pipeline_id",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"key": "create_pipeline_flag",
-			"value": "false",
-			"type": "string"
-		},
-		{
-			"key": "create_properties_flag",
-			"value": "false",
-			"type": "string"
-		},
-		{
-			"key": "create_example_objects_flag",
-			"value": "false",
-			"type": "string"
+			"key": "shipped_stage_id",
+			"value": ""
 		},
 		{
 			"key": "created_deal_id",
@@ -2032,16 +2056,6 @@
 		{
 			"key": "created_line_item_id",
 			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "ecommerce_property_group_internal_name",
-			"value": "ecommerce",
-			"type": "string"
-		},
-		{
-			"key": "ecommerce_property_group_label",
-			"value": "Ecommerce New",
 			"type": "string"
 		}
 	]
