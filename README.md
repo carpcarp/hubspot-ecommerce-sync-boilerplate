@@ -46,8 +46,8 @@
 
 **Open Collection runner:**
 
-Configure Run Settings
-[![4iDMW7.png](https://iili.io/4iDMW7.png)](https://freeimage.host/)
+Configure Run Settings<br/><br/>
+[![4iDMW7.png](https://iili.io/4iDMW7.png)](https://freeimage.host/)<br/>
 
 Run all requests in collection
 	 - This will setup pipeline
