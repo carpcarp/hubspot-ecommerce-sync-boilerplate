@@ -2036,7 +2036,8 @@
 		},
 		{
 			"key": "shipped_stage_id",
-			"value": ""
+			"value": "",
+			"type": "string"
 		},
 		{
 			"key": "created_deal_id",
