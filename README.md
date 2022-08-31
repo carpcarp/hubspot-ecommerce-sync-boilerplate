@@ -46,6 +46,9 @@
 
 **Open Collection runner:**
 
+Configure Run Settings
+[![4iDMW7.png](https://iili.io/4iDMW7.png)](https://freeimage.host/)
+
 Run all requests in collection
 	 - This will setup pipeline
 	 - Create properties
