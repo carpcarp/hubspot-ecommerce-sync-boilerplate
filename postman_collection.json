@@ -89,7 +89,7 @@
 									"var pipeline_exists;",
 									"var test_message;",
 									"var pipeline_id = pm.collectionVariables.get(\"pipeline_id\");",
-									"var pipeline_id_known = pm.collectionVariables.get(\"pipeline_id\")!=null;",
+									"var pipeline_id_known = pipeline_id!=null && pipeline_id!=\"\";",
 									"var create_pipeline_flag = pm.collectionVariables.get(\"create_pipeline_flag\")=='true';",
 									"if(pipeline_id_known || !create_pipeline_flag){",
 									"    pipeline_exists = true",
