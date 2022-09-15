@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8001ee56-d904-4293-96b0-91113dc632bf",
+		"_postman_id": "2d3236dc-a628-4506-8d7e-9c714cc1efbd",
 		"name": "Migration Boilerplate",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20193231"
@@ -889,13 +889,18 @@
 									"script": {
 										"exec": [
 											"var jsonData = JSON.parse(responseBody);",
-											"try {",
-											"    const record_id = jsonData.id",
-											"    pm.collectionVariables.set(\"created_contact_id\", record_id);",
-											"    pm.test(`Record Created`, () => true); ",
-											"    // postman.setNextRequest()",
-											"} catch (error) {",
-											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"if(pm.response.code==201){",
+											"    try {",
+											"        const record_id = jsonData.id",
+											"        pm.collectionVariables.set(\"created_contact_id\", record_id);",
+											"        pm.test(`Record Created`, () => true); ",
+											"        // postman.setNextRequest()",
+											"    } catch (error) {",
+											"        pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"    }",
+											"}",
+											"else {",
+											"     pm.test(\"Request Failed\", () => {throw new Error(pm.response.status)}); ",
 											"}"
 										],
 										"type": "text/javascript"
@@ -1103,13 +1108,18 @@
 									"script": {
 										"exec": [
 											"var jsonData = JSON.parse(responseBody);",
-											"try {",
-											"    const record_id = jsonData.id",
-											"    pm.collectionVariables.set(\"created_deal_id\", record_id);",
-											"    pm.test(`Record Created`, () => true); ",
-											"    // postman.setNextRequest()",
-											"} catch (error) {",
-											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"if(pm.response.code==201){",
+											"    try {",
+											"        const record_id = jsonData.id",
+											"        pm.collectionVariables.set(\"created_deal_id\", record_id);",
+											"        pm.test(`Record Created`, () => true); ",
+											"        // postman.setNextRequest()",
+											"    } catch (error) {",
+											"        pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"    }",
+											"}",
+											"else {",
+											"     pm.test(\"Request Failed\", () => {throw new Error(pm.response.status)}); ",
 											"}"
 										],
 										"type": "text/javascript"
@@ -1317,13 +1327,18 @@
 									"script": {
 										"exec": [
 											"var jsonData = JSON.parse(responseBody);",
-											"try {",
-											"    const record_id = jsonData.id",
-											"    pm.collectionVariables.set(\"created_product_id\", record_id);",
-											"    pm.test(`Record Created`, () => true); ",
-											"    // postman.setNextRequest()",
-											"} catch (error) {",
-											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"if(pm.response.code==201){",
+											"    try {",
+											"        const record_id = jsonData.id",
+											"        pm.collectionVariables.set(\"created_product_id\", record_id);",
+											"        pm.test(`Record Created`, () => true); ",
+											"        // postman.setNextRequest()",
+											"    } catch (error) {",
+											"        pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"    }",
+											"}",
+											"else {",
+											"     pm.test(\"Request Failed\", () => {throw new Error(pm.response.status)}); ",
 											"}"
 										],
 										"type": "text/javascript"
@@ -1532,13 +1547,18 @@
 									"script": {
 										"exec": [
 											"var jsonData = JSON.parse(responseBody);",
-											"try {",
-											"    const record_id = jsonData.id",
-											"    pm.collectionVariables.set(\"created_line_item_id\", record_id);",
-											"    pm.test(`Record Created`, () => true); ",
-											"    // postman.setNextRequest()",
-											"} catch (error) {",
-											"    pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"if(pm.response.code==201){",
+											"    try {",
+											"        const record_id = jsonData.id",
+											"        pm.collectionVariables.set(\"created_line_item_id\", record_id);",
+											"        pm.test(`Record Created`, () => true); ",
+											"        // postman.setNextRequest()",
+											"    } catch (error) {",
+											"        pm.test(\"Record did not create\", () => {throw new Error(responseBody)}); ",
+											"    }",
+											"}",
+											"else {",
+											"     pm.test(\"Request Failed\", () => {throw new Error(pm.response.status)}); ",
 											"}"
 										],
 										"type": "text/javascript"
