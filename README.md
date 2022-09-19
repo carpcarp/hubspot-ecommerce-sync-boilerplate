@@ -1,11 +1,13 @@
-
-
 # hubspot-ecommerce-sync-boilerplate
 
 **A 2022 Ecommerce Bridge to CRM v3 sync boilerplate postman collection runner**
 
+Welcome, the purpose of this repository is to create an Ecommerce Bridge like syncing experience using the CRM V3 API.
+To make this as simple as possible I compiled everything into a single Postman collection. By running the collection in a test environment you will create an Ecommerce Pipeline, the necessary ecommerce properties, and sync messages to teach by example.
+Please test this on a developer test portal before running in production.
+
 ## Instructions:
-**Create Private app in your Husbpot portal with the following scopes: (could be thinned but will need testing):**
+**Create Private app in your Husbpot portal with the following scopes:
 
  - [ ] integration-sync e-commerce 
  - [ ] crm.objects.contacts.read
