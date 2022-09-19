@@ -7,12 +7,18 @@
 ## Instructions:
 **Create Private app in your Husbpot portal with the following scopes: (could be thinned but will need testing):**
 
- - [ ] integration-sync e-commerce crm.objects.contacts.read
- - [ ] crm.objects.contacts.write crm.schemas.contacts.read
- - [ ] crm.objects.deals.read crm.objects.deals.write
- - [ ] crm.schemas.contacts.write crm.schemas.deals.read
- - [ ] crm.schemas.deals.write crm.objects.line_items.read
- - [ ] crm.objects.line_items.write crm.schemas.line_items.read
+ - [ ] integration-sync e-commerce 
+ - [ ] crm.objects.contacts.read
+ - [ ] crm.objects.contacts.write 
+ - [ ] crm.schemas.contacts.read
+ - [ ] crm.objects.deals.read 
+ - [ ] crm.objects.deals.write
+ - [ ] crm.schemas.contacts.write 
+ - [ ] crm.schemas.deals.read
+ - [ ] crm.schemas.deals.write 
+ - [ ] crm.objects.line_items.read
+ - [ ] crm.objects.line_items.write 
+ - [ ] crm.schemas.line_items.read
 
 **Create new Postman Workspace**
 
